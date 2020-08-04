@@ -1,6 +1,6 @@
 package gov.nysed.workflow.controller;
 
-import gov.nysed.workflow.domain.repository.WorkflowRepository;
+import gov.nysed.workflow.step.StepResult;
 import gov.nysed.workflow.processor.DefaultWorkflowProcessor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,7 +21,8 @@ public class WorkflowController {
 
     @RequestMapping()
     public ModelAndView process(@PathVariable(name="workflow") String workflow, HttpServletResponse response) {
-        ModelAndView view = defaultWorkflowProcessor.runWorkflow(workflow);
+        StepResult<ModelAndView> result = defaultWorkflowProcessor.runWorkflow(workflow);
+        ModelAndView view = result.getOutput();
         view.addObject("workflowSlug", workflow);
 
         preventHttpCache(response);
@@ -35,7 +36,9 @@ public class WorkflowController {
             @PathVariable(name="step") String step,
             HttpServletResponse response
     ) {
-        ModelAndView view = defaultWorkflowProcessor.runWorkflow(workflow, step);
+        StepResult<ModelAndView> result = defaultWorkflowProcessor.runWorkflow(workflow, step);
+        ModelAndView view = result.getOutput();
+
         view.addObject("workflowSlug", workflow);
 
         preventHttpCache(response);

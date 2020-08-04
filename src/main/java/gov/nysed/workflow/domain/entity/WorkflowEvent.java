@@ -1,6 +1,5 @@
 package gov.nysed.workflow.domain.entity;
 
-import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
 
@@ -13,7 +12,6 @@ import java.util.UUID;
  */
 @Entity
 @Table(name = "WORKFLOW_EVENT")
-@Data
 public class WorkflowEvent {
 
     @Id
@@ -36,4 +34,35 @@ public class WorkflowEvent {
     @Column
     private Date dateCreated;
 
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public WorkflowResult getResult() {
+        return result;
+    }
+
+    public void setResult(WorkflowResult result) {
+        this.result = result;
+    }
+
+    public WorkflowEventType getEventType() {
+        return eventType;
+    }
+
+    public void setEventType(WorkflowEventType eventType) {
+        this.eventType = eventType;
+    }
+
+    public Date getDateCreated() {
+        return dateCreated;
+    }
+
+    public void setDateCreated(Date dateCreated) {
+        this.dateCreated = dateCreated;
+    }
 }

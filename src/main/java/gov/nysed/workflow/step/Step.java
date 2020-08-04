@@ -1,8 +1,7 @@
-package gov.nysed.workflow;
+package gov.nysed.workflow.step;
 
 import gov.nysed.workflow.util.RequestUtil;
 import gov.nysed.workflow.domain.entity.WorkflowResult;
-import org.springframework.web.servlet.ModelAndView;
 
 public interface Step {
 

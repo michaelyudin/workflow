@@ -1,5 +1,7 @@
 package gov.nysed.workflow;
 
+import gov.nysed.workflow.step.Step;
+
 import java.util.*;
 
 public class WorkflowBuilder {

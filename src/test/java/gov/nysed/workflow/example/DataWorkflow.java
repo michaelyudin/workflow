@@ -1,6 +1,6 @@
 package gov.nysed.workflow.example;
 
-import gov.nysed.workflow.Step;
+import gov.nysed.workflow.step.Step;
 import gov.nysed.workflow.Workflow;
 import gov.nysed.workflow.WorkflowBuilder;
 import gov.nysed.workflow.example.step.AttestationStep;

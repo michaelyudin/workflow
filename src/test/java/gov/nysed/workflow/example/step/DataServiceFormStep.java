@@ -1,7 +1,8 @@
 package gov.nysed.workflow.example.step;
 
-import gov.nysed.workflow.Step;
-import gov.nysed.workflow.StepResult;
+import gov.nysed.workflow.step.Step;
+import gov.nysed.workflow.step.StepResult;
+import gov.nysed.workflow.step.WebStepResult;
 import gov.nysed.workflow.domain.entity.WorkflowEvent;
 import gov.nysed.workflow.domain.entity.WorkflowEventType;
 import gov.nysed.workflow.domain.entity.WorkflowResult;
@@ -31,7 +32,7 @@ public class DataServiceFormStep implements Step {
         // process the step response.
         if (RequestUtil.isCurrentStep(this.getName())) {
             createCompletedEvent(result);
-            return new StepResult("RESULT_COMPLETED", null);
+            return new WebStepResult("RESULT_COMPLETED", null, true);
         } else {
             WorkflowEvent startedEvent = result.getEvents()
                     .stream()
@@ -46,7 +47,7 @@ public class DataServiceFormStep implements Step {
 
         view.addObject("result", result);
 
-        return new StepResult("RESULT_STARTED", view);
+        return new WebStepResult("RESULT_STARTED", view, false);
     }
 
     @Override

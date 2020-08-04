@@ -1,10 +1,7 @@
 package gov.nysed.workflow;
 
 import gov.nysed.workflow.domain.entity.WorkflowResult;
-
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import gov.nysed.workflow.step.Step;
 
 public interface Workflow {
 

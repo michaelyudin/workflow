@@ -1,7 +1,7 @@
 package gov.nysed.workflow.example.step;
 
-import gov.nysed.workflow.Step;
-import gov.nysed.workflow.StepResult;
+import gov.nysed.workflow.step.Step;
+import gov.nysed.workflow.step.WebStepResult;
 import gov.nysed.workflow.domain.entity.WorkflowEvent;
 import gov.nysed.workflow.domain.entity.WorkflowEventType;
 import gov.nysed.workflow.domain.entity.WorkflowResult;
@@ -27,7 +27,7 @@ public class AttestationStep implements Step {
     }
 
     @Override
-    public StepResult runStep(WorkflowResult result) {
+    public WebStepResult runStep(WorkflowResult result) {
 
         ModelAndView view = new ModelAndView("attestation");
 
@@ -38,10 +38,10 @@ public class AttestationStep implements Step {
             AttestationEvent event = new AttestationEvent();
             this.bindAndValidate(event);
             createCompletedEvent(result, event);
-            return new StepResult("ATTESTATION_COMPLETED", null);
+            return new WebStepResult("ATTESTATION_COMPLETED", null, true);
         }
 
-        return new StepResult("ATTESTATION_LOADED", view);
+        return new WebStepResult("ATTESTATION_LOADED", view, false);
     }
 
     @Override

@@ -1,7 +1,7 @@
 package gov.nysed.workflow.processor;
 
-import gov.nysed.workflow.Step;
-import gov.nysed.workflow.StepResult;
+import gov.nysed.workflow.step.Step;
+import gov.nysed.workflow.step.StepResult;
 import gov.nysed.workflow.Workflow;
 import gov.nysed.workflow.domain.entity.WorkflowConfig;
 import gov.nysed.workflow.domain.entity.WorkflowResult;
@@ -13,7 +13,6 @@ import gov.nysed.workflow.exception.WorkflowNotFoundException;
 import gov.nysed.workflow.service.EventService;
 import gov.nysed.workflow.util.RequestUtil;
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.ModelAndView;
 
 import java.util.UUID;
 
@@ -38,11 +37,11 @@ public class DefaultWorkflowProcessor {
         this.workflowRepository = workflowRepository;
     }
 
-    public ModelAndView runWorkflow(String workflowSlug) {
+    public StepResult runWorkflow(String workflowSlug) {
         return runWorkflow(workflowSlug, null);
     }
 
-    public ModelAndView runWorkflow(String workflowSlug, String jumpStep) {
+    public StepResult runWorkflow(String workflowSlug, String jumpStep) {
         WorkflowConfig workflowConfig = workflowRepository.findWorkflowConfigBySlug(workflowSlug)
                 .orElseThrow(() -> new WorkflowNotFoundException("Could not locate the workflow config for '" + workflowSlug + "'."));
 
@@ -64,8 +63,8 @@ public class DefaultWorkflowProcessor {
             setCurrentStep(result, firstStep);
         }
 
-        if (stepResult.getOutput() != null) {
-            return stepResult.getOutput();
+        if (!stepResult.isComplete()) {
+            return stepResult;
         } else {
             Step nextStep = workflow.getBuilder()
                     .getStepForEvent(stepResult.getEventName())
@@ -82,7 +81,7 @@ public class DefaultWorkflowProcessor {
 
             setCurrentStep(result, nextStep);
 
-            return nextStepResult.getOutput();
+            return nextStepResult;
 
         }
         //throw new InvalidStepConfigException("The last step in your config should either have no completed event or redirect out of the workflow.");
@@ -144,6 +143,7 @@ public class DefaultWorkflowProcessor {
         if (step == null) {
             return;
         }
+
         int currentIdx = workflow.getBuilder().getStepNames().indexOf(result.getCurrentStep());
         int requestedIdx = workflow.getBuilder().getStepNames().indexOf(step);
 
