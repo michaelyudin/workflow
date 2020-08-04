@@ -1,6 +1,7 @@
 package gov.nysed.workflow.example.step;
 
 import gov.nysed.workflow.Step;
+import gov.nysed.workflow.StepResult;
 import gov.nysed.workflow.domain.entity.WorkflowEvent;
 import gov.nysed.workflow.domain.entity.WorkflowEventType;
 import gov.nysed.workflow.domain.entity.WorkflowResult;
@@ -14,7 +15,7 @@ import org.springframework.web.servlet.ModelAndView;
 @Service
 public class AttestationStep implements Step {
 
-    private static final String COMPLETED_EVENT_NAME = "ATTESTATION_CAPTURED";
+    private static final String COMPLETED_EVENT_NAME = "ATTESTATION_COMPLETED";
 
     private EventService eventService;
 
@@ -26,7 +27,7 @@ public class AttestationStep implements Step {
     }
 
     @Override
-    public ModelAndView runStep(WorkflowResult result) {
+    public StepResult runStep(WorkflowResult result) {
 
         ModelAndView view = new ModelAndView("attestation");
 
@@ -37,14 +38,20 @@ public class AttestationStep implements Step {
             AttestationEvent event = new AttestationEvent();
             this.bindAndValidate(event);
             createCompletedEvent(result, event);
+            return new StepResult("ATTESTATION_COMPLETED", null);
         }
 
-        return view;
+        return new StepResult("ATTESTATION_LOADED", view);
     }
 
     @Override
     public String getName() {
         return "attestation";
+    }
+
+    @Override
+    public boolean isStepValid(WorkflowResult result) {
+        return result.getWorkflowConfig().getSlug() == "delayed-reg";
     }
 
     @Override

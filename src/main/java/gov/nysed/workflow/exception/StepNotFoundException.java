@@ -3,10 +3,10 @@ package gov.nysed.workflow.exception;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-public class InvalidStepConfigException extends RuntimeException {
+@ResponseStatus(HttpStatus.NOT_FOUND)
+public class StepNotFoundException extends RuntimeException {
 
-    public InvalidStepConfigException(String message) {
+    public StepNotFoundException(String message) {
         super(message);
     }
 }

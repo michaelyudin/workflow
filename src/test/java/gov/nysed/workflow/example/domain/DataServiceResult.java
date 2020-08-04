@@ -1,7 +1,6 @@
 package gov.nysed.workflow.example.domain;
 
 import gov.nysed.workflow.domain.entity.WorkflowEvent;
-import lombok.Data;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -9,9 +8,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name="DATA_SERVICE_RESULT")
-@Data
 public class DataServiceResult {
-
 
     @Id
     @GeneratedValue(generator = "UUID")
@@ -27,5 +24,27 @@ public class DataServiceResult {
 
     private String dataServiceResultId;
 
+    public UUID getId() {
+        return id;
+    }
 
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public WorkflowEvent getEvent() {
+        return event;
+    }
+
+    public void setEvent(WorkflowEvent event) {
+        this.event = event;
+    }
+
+    public String getDataServiceResultId() {
+        return dataServiceResultId;
+    }
+
+    public void setDataServiceResultId(String dataServiceResultId) {
+        this.dataServiceResultId = dataServiceResultId;
+    }
 }

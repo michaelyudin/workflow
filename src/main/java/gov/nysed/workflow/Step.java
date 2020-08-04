@@ -12,7 +12,7 @@ public interface Step {
      * @param result
      * @return
      */
-    ModelAndView runStep(WorkflowResult result);
+    StepResult runStep(WorkflowResult result);
 
     /**
      * Determine if this step should be processed.

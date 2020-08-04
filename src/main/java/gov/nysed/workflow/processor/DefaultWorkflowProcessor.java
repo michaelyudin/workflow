@@ -1,13 +1,14 @@
 package gov.nysed.workflow.processor;
 
 import gov.nysed.workflow.Step;
+import gov.nysed.workflow.StepResult;
 import gov.nysed.workflow.Workflow;
 import gov.nysed.workflow.domain.entity.WorkflowConfig;
-import gov.nysed.workflow.domain.entity.WorkflowEvent;
 import gov.nysed.workflow.domain.entity.WorkflowResult;
 import gov.nysed.workflow.domain.repository.ResultRepository;
 import gov.nysed.workflow.domain.repository.WorkflowRepository;
 import gov.nysed.workflow.exception.InvalidStepConfigException;
+import gov.nysed.workflow.exception.StepNotFoundException;
 import gov.nysed.workflow.exception.WorkflowNotFoundException;
 import gov.nysed.workflow.service.EventService;
 import gov.nysed.workflow.util.RequestUtil;
@@ -38,6 +39,10 @@ public class DefaultWorkflowProcessor {
     }
 
     public ModelAndView runWorkflow(String workflowSlug) {
+        return runWorkflow(workflowSlug, null);
+    }
+
+    public ModelAndView runWorkflow(String workflowSlug, String jumpStep) {
         WorkflowConfig workflowConfig = workflowRepository.findWorkflowConfigBySlug(workflowSlug)
                 .orElseThrow(() -> new WorkflowNotFoundException("Could not locate the workflow config for '" + workflowSlug + "'."));
 
@@ -46,21 +51,41 @@ public class DefaultWorkflowProcessor {
 
         WorkflowResult result = getWorkflowResult(workflowConfig);
 
+        jumpToStep(workflow, result, jumpStep);
+
         // if we are processing an existing step
         // do so before going on to the next
-        processCurrentStep(workflow, result);
+        StepResult stepResult = processCurrentStep(workflow, result);
 
+        if (stepResult == null) {
+            Step firstStep = workflow.getInitialStep(result);
+            stepResult = firstStep.runStep(result);
 
-        // loop through steps and find the first one that is valid and not completed.
-        for (Step step: workflow.getSteps()) {
-            if (step.isStepValid(result) && !hasStepCompleted(result, step)) {
-                ModelAndView view = step.runStep(result);
-                setCurrentStep(result, step);
-                return view;
-            }
+            setCurrentStep(result, firstStep);
         }
 
-        throw new InvalidStepConfigException("The last step in your config should either have no completed event or redirect out of the workflow.");
+        if (stepResult.getOutput() != null) {
+            return stepResult.getOutput();
+        } else {
+            Step nextStep = workflow.getBuilder()
+                    .getStepForEvent(stepResult.getEventName())
+                    .orElse(
+                            workflow.getBuilder()
+                                    .getNextStepInSequence(result.getCurrentStep())
+                                    .orElse(null));
+
+            if (nextStep == null) {
+                throw new InvalidStepConfigException("Could not locate a next step.  It's possible your last step does not terminate the process.  The last step should have no form or continue.");
+            }
+
+            StepResult nextStepResult = nextStep.runStep(result);
+
+            setCurrentStep(result, nextStep);
+
+            return nextStepResult.getOutput();
+
+        }
+        //throw new InvalidStepConfigException("The last step in your config should either have no completed event or redirect out of the workflow.");
     }
 
     private void setCurrentStep(WorkflowResult result, Step step) {
@@ -74,16 +99,14 @@ public class DefaultWorkflowProcessor {
      * @param workflow
      * @param result
      */
-    private void processCurrentStep(Workflow workflow, WorkflowResult result) {
-        Step currentStep = workflow.getSteps()
-                .stream()
-                .filter(step -> RequestUtil.isCurrentStep(step.getName()))
-                .findFirst()
-                .orElse(null);
+    private StepResult processCurrentStep(Workflow workflow, WorkflowResult result) {
+        Step currentStep = workflow.getBuilder().getStep(result.getCurrentStep()).orElse(null);
 
         if (currentStep != null) {
-            currentStep.runStep(result);
+            return currentStep.runStep(result);
         }
+
+        return null;
     }
 
     /**
@@ -110,19 +133,28 @@ public class DefaultWorkflowProcessor {
     }
 
     /**
-     * Determine if a step has already been completed for a result.
+     * If user is trying to jump to a specific check, ensure they are able to do so
+     * and set the result's current step to the requested step if allowed.
      *
+     * @param workflow
      * @param result
      * @param step
-     * @return
      */
-    private boolean hasStepCompleted(WorkflowResult result, Step step) {
-        for (WorkflowEvent event : eventService.getEventsSinceLastContinue(result)) {
-            if (event.getEventType().getEventType().equals(step.getCompletedEventName())) {
-                return true;
-            }
+    private void jumpToStep(Workflow workflow, WorkflowResult result, String step) {
+        if (step == null) {
+            return;
+        }
+        int currentIdx = workflow.getBuilder().getStepNames().indexOf(result.getCurrentStep());
+        int requestedIdx = workflow.getBuilder().getStepNames().indexOf(step);
+
+        if (requestedIdx == -1 ) {
+            throw new StepNotFoundException("Could not locate step '" + step + "'.");
         }
 
-        return false;
+        if (requestedIdx > currentIdx) {
+            throw new InvalidStepConfigException("CANT LOAD THIS STEP");
+        }
+
+        setCurrentStep(result, workflow.getBuilder().getStep(step).orElse(null));
     }
 }

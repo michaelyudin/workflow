@@ -24,4 +24,8 @@ public class WorkflowMapper {
     public Optional<Workflow> getWorkflow(WorkflowConfig workflow) {
         return Optional.ofNullable(workflows.getOrDefault(workflow.getSlug(), null));
     }
+
+    public Map<String, Workflow> getWorkflows() {
+        return workflows;
+    }
 }

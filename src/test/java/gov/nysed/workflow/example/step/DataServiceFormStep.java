@@ -1,6 +1,7 @@
 package gov.nysed.workflow.example.step;
 
 import gov.nysed.workflow.Step;
+import gov.nysed.workflow.StepResult;
 import gov.nysed.workflow.domain.entity.WorkflowEvent;
 import gov.nysed.workflow.domain.entity.WorkflowEventType;
 import gov.nysed.workflow.domain.entity.WorkflowResult;
@@ -11,25 +12,26 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.ModelAndView;
 
 @Service
-public class ResultStep implements Step {
+public class DataServiceFormStep implements Step {
 
     private static final String STARTED_EVENT_NAME = "RESULT_STARTED";
     private static final String COMPLETED_EVENT_NAME = "RESULT_CAPTURED";
 
     private EventService eventService;
 
-    public ResultStep(EventService eventService) {
+    public DataServiceFormStep(EventService eventService) {
         this.eventService = eventService;
     }
 
     @Override
-    public ModelAndView runStep(WorkflowResult result) {
+    public StepResult runStep(WorkflowResult result) {
 
         ModelAndView view = new ModelAndView("result");
 
         // process the step response.
         if (RequestUtil.isCurrentStep(this.getName())) {
             createCompletedEvent(result);
+            return new StepResult("RESULT_COMPLETED", null);
         } else {
             WorkflowEvent startedEvent = result.getEvents()
                     .stream()
@@ -44,7 +46,7 @@ public class ResultStep implements Step {
 
         view.addObject("result", result);
 
-        return view;
+        return new StepResult("RESULT_STARTED", view);
     }
 
     @Override
