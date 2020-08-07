@@ -20,7 +20,7 @@ public class WorkflowController {
     }
 
     @RequestMapping()
-    public ModelAndView process(@PathVariable(name="workflow") String workflow, HttpServletResponse response) {
+    public ModelAndView process(@PathVariable(name = "workflow") String workflow, HttpServletResponse response) {
         StepResult<ModelAndView> result = defaultWorkflowProcessor.runWorkflow(workflow);
         ModelAndView view = result.getOutput();
         view.addObject("workflowSlug", workflow);
@@ -32,8 +32,8 @@ public class WorkflowController {
 
     @RequestMapping("/{step}")
     public ModelAndView processStep(
-            @PathVariable(name="workflow") String workflow,
-            @PathVariable(name="step") String step,
+            @PathVariable(name = "workflow") String workflow,
+            @PathVariable(name = "step") String step,
             HttpServletResponse response
     ) {
         StepResult<ModelAndView> result = defaultWorkflowProcessor.runWorkflow(workflow, step);
@@ -42,6 +42,7 @@ public class WorkflowController {
         view.addObject("workflowSlug", workflow);
 
         preventHttpCache(response);
+
         return view;
     }
 

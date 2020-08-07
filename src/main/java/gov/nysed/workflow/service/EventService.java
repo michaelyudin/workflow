@@ -16,7 +16,7 @@ public interface EventService {
      * @param event
      * @return
      */
-    WorkflowEvent createEvent(WorkflowEvent event);
+    WorkflowEvent createEvent(WorkflowResult result, String eventType, String eventName);
 
     /**
      * Insert a new EventType in the EVENT_TYPE table.

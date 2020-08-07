@@ -1,7 +1,7 @@
 package gov.nysed.workflow.processor;
 
 import gov.nysed.workflow.Workflow;
-import gov.nysed.workflow.domain.entity.WorkflowConfig;
+import gov.nysed.workflow.domain.entity.WorkflowIdentifier;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -21,8 +21,8 @@ public class WorkflowMapper {
         workflows.forEach(workflow -> this.workflows.put(workflow.getName(), workflow));
     }
 
-    public Optional<Workflow> getWorkflow(WorkflowConfig workflow) {
-        return Optional.ofNullable(workflows.getOrDefault(workflow.getSlug(), null));
+    public Optional<Workflow> getWorkflow(WorkflowIdentifier workflowIdentifier) {
+        return Optional.ofNullable(workflows.getOrDefault(workflowIdentifier.getSlug(), null));
     }
 
     public Map<String, Workflow> getWorkflows() {

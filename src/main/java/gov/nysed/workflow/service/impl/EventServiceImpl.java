@@ -3,12 +3,11 @@ package gov.nysed.workflow.service.impl;
 import gov.nysed.workflow.domain.entity.WorkflowEvent;
 import gov.nysed.workflow.domain.entity.WorkflowEventType;
 import gov.nysed.workflow.domain.entity.WorkflowResult;
-import gov.nysed.workflow.domain.repository.EventRepository;
-import gov.nysed.workflow.domain.repository.EventTypeRepository;
+import gov.nysed.workflow.domain.repository.WorkflowEventRepository;
+import gov.nysed.workflow.domain.repository.WorkflowEventTypeRepository;
 import gov.nysed.workflow.service.EventService;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -16,28 +15,40 @@ import java.util.Optional;
 @Service
 public class EventServiceImpl implements EventService {
 
-    private EventRepository eventRepository;
+    private WorkflowEventRepository workflowEventRepository;
 
-    private EventTypeRepository eventTypeRepository;
+    private WorkflowEventTypeRepository workflowEventTypeRepository;
 
-    public EventServiceImpl(EventRepository eventRepository, EventTypeRepository eventTypeRepository) {
-        this.eventRepository = eventRepository;
-        this.eventTypeRepository = eventTypeRepository;
+    public EventServiceImpl(WorkflowEventRepository workflowEventRepository, WorkflowEventTypeRepository workflowEventTypeRepository) {
+        this.workflowEventRepository = workflowEventRepository;
+        this.workflowEventTypeRepository = workflowEventTypeRepository;
     }
 
     @Override
-    public WorkflowEvent createEvent(WorkflowEvent event) {
-        return eventRepository.save(event);
+    public WorkflowEvent createEvent(WorkflowResult result, String eventType, String eventName) {
+        WorkflowEvent event = new WorkflowEvent();
+        event.setResult(result);
+        event.setEventType(findEventType(eventType).orElse(createCompletedEventType(eventType, eventName)));
+
+        return workflowEventRepository.save(event);
+    }
+
+    private WorkflowEventType createCompletedEventType(String eventType, String eventName) {
+        WorkflowEventType eventTypeEntity = new WorkflowEventType();
+        eventTypeEntity.setEventType(eventType);
+        eventTypeEntity.setEventName("Attestation Completed");
+
+        return workflowEventTypeRepository.save(eventTypeEntity);
     }
 
     @Override
     public WorkflowEventType createEventType(WorkflowEventType eventType) {
-        return eventTypeRepository.save(eventType);
+        return workflowEventTypeRepository.save(eventType);
     }
 
     @Override
     public Optional<WorkflowEventType> findEventType(String eventType) {
-        return eventTypeRepository.findById(eventType);
+        return workflowEventTypeRepository.findById(eventType);
     }
 
     @Override
@@ -46,15 +57,15 @@ public class EventServiceImpl implements EventService {
         event.setResult(result);
         event.setEventType(getContinueEventType());
 
-        return eventRepository.save(event);
+        return workflowEventRepository.save(event);
     }
 
     @Override
     public List<WorkflowEvent> getEventsSinceLastContinue(WorkflowResult result) {
-        WorkflowEvent lastContinue = eventRepository.findTopByResultAndEventTypeOrderByDateCreatedDesc(result, getContinueEventType());
+        WorkflowEvent lastContinue = workflowEventRepository.findTopByResultAndEventTypeOrderByDateCreatedDesc(result, getContinueEventType());
         Date lastEventCheckDate = lastContinue != null ? lastContinue.getDateCreated() : result.getDateCreated();
 
-        return eventRepository.findAllByResultAndDateCreatedAfterOrderByDateCreated(result, lastEventCheckDate);
+        return workflowEventRepository.findAllByResultAndDateCreatedAfterOrderByDateCreated(result, lastEventCheckDate);
     }
 
     /**
@@ -68,7 +79,7 @@ public class EventServiceImpl implements EventService {
         if (continueEvent.getEventType() == null) {
             continueEvent.setEventName("Continue Workflow");
             continueEvent.setEventType(EventService.CONTINUE_EVENT);
-            eventTypeRepository.save(continueEvent);
+            workflowEventTypeRepository.save(continueEvent);
         }
 
         return continueEvent;

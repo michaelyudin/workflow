@@ -23,7 +23,7 @@ public class RequestUtil {
     public static Object bindPostToObject(Object object) {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
 
-        if (request.getParameter("_step") != null) {
+        if (isPost()) {
             ServletRequestDataBinder binder = new ServletRequestDataBinder(object);
             binder.bind(request);
         }
@@ -52,6 +52,19 @@ public class RequestUtil {
         return RequestUtil.getCurrentStep().equals(step);
     }
 
+
+    /**
+     * Is the step passed in the current one being processed?
+     *
+     * @param step
+     * @return
+     */
+    public static boolean isPost() {
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+
+        return request.getMethod().equals("POST");
+    }
+
     /**
      * Determine the current step from the Request.
      *
@@ -60,7 +73,7 @@ public class RequestUtil {
     public static UUID getResultUuid() {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
 
-        return request.getParameter("_result_uuid") != null ? UUID.fromString(request.getParameter("_result_uuid")) : null;
+        return request.getParameter("rid") != null ? UUID.fromString(request.getParameter("rid")) : null;
     }
 
     /**
@@ -78,5 +91,12 @@ public class RequestUtil {
         if (!errors.isEmpty()) {
             throw new ValidationException("Validation on request failed.", errors);
         }
+    }
+
+    public static String getContextPath() {
+
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+
+        return request.getContextPath();
     }
 }

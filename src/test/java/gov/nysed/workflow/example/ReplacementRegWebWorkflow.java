@@ -1,6 +1,5 @@
 package gov.nysed.workflow.example;
 
-import gov.nysed.workflow.step.Step;
 import gov.nysed.workflow.Workflow;
 import gov.nysed.workflow.WorkflowBuilder;
 import gov.nysed.workflow.example.step.AttestationStep;
@@ -9,26 +8,28 @@ import gov.nysed.workflow.example.step.ThankYouStep;
 import org.springframework.stereotype.Service;
 
 @Service
-public class DataWorkflow implements Workflow {
+public class ReplacementRegWebWorkflow implements Workflow {
 
-    private DataServiceFormStep resultStep;
+    private DataServiceFormStep dataServiceFormStep;
 
     private AttestationStep attestationStep;
 
+    private ThankYouStep thankYouStep;
+
     public static String NAME = "replace-reg";
 
-    public DataWorkflow(DataServiceFormStep dataServiceFormStep, AttestationStep attestationStep) {
-        this.resultStep = dataServiceFormStep;
+    public ReplacementRegWebWorkflow(DataServiceFormStep dataServiceFormStep, AttestationStep attestationStep, ThankYouStep thankYouStep) {
+        this.dataServiceFormStep = dataServiceFormStep;
         this.attestationStep = attestationStep;
+        this.thankYouStep = thankYouStep;
     }
 
     @Override
     public WorkflowBuilder getBuilder() {
-        Step thankYouStep = new ThankYouStep();
 
         return WorkflowBuilder
                 .create()
-                .addStep(this.resultStep)
+                .addStep(this.dataServiceFormStep)
                 .addStep(this.attestationStep)
                 .addStep(thankYouStep)
                 .onEvent("RESULT_COMPLETED", attestationStep.getName())

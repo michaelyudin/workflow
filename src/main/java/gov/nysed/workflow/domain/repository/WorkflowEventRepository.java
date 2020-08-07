@@ -10,7 +10,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-public interface EventRepository extends JpaRepository<WorkflowEvent, UUID> {
+public interface WorkflowEventRepository extends JpaRepository<WorkflowEvent, UUID> {
 
     /**
      * Finds the last occurrence of a specific event type for a result.

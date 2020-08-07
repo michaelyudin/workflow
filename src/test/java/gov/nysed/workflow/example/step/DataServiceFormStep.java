@@ -1,13 +1,12 @@
 package gov.nysed.workflow.example.step;
 
-import gov.nysed.workflow.step.Step;
-import gov.nysed.workflow.step.StepResult;
-import gov.nysed.workflow.step.WebStepResult;
 import gov.nysed.workflow.domain.entity.WorkflowEvent;
-import gov.nysed.workflow.domain.entity.WorkflowEventType;
 import gov.nysed.workflow.domain.entity.WorkflowResult;
 import gov.nysed.workflow.example.domain.DataServiceResult;
 import gov.nysed.workflow.service.EventService;
+import gov.nysed.workflow.step.Step;
+import gov.nysed.workflow.step.StepResult;
+import gov.nysed.workflow.step.WebStepResult;
 import gov.nysed.workflow.util.RequestUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.ModelAndView;
@@ -31,14 +30,15 @@ public class DataServiceFormStep implements Step {
 
         // process the step response.
         if (RequestUtil.isCurrentStep(this.getName())) {
-            createCompletedEvent(result);
+            eventService.createEvent(result, COMPLETED_EVENT_NAME, "Result Completed");
+
             return new WebStepResult("RESULT_COMPLETED", null, true);
         } else {
             WorkflowEvent startedEvent = result.getEvents()
                     .stream()
                     .filter(workflowEvent -> workflowEvent.getEventType().equals(STARTED_EVENT_NAME))
                     .findFirst()
-                    .orElse(createStartedEvent(result));
+                    .orElse(eventService.createEvent(result, STARTED_EVENT_NAME, "Result Started"));
 
             DataServiceResult dataServiceResult = new DataServiceResult();
             dataServiceResult.setEvent(startedEvent);
@@ -58,37 +58,5 @@ public class DataServiceFormStep implements Step {
     @Override
     public String getCompletedEventName() {
         return COMPLETED_EVENT_NAME;
-    }
-
-    private WorkflowEvent createStartedEvent(WorkflowResult result) {
-        WorkflowEvent event = new WorkflowEvent();
-        event.setResult(result);
-        event.setEventType(eventService.findEventType(STARTED_EVENT_NAME).orElse(createStartedEventType()));
-
-        return eventService.createEvent(event);
-    }
-
-    private WorkflowEventType createStartedEventType() {
-        WorkflowEventType eventType = new WorkflowEventType();
-        eventType.setEventType(STARTED_EVENT_NAME);
-        eventType.setEventName("Result Started");
-
-        return eventService.createEventType(eventType);
-    }
-
-    private WorkflowEvent createCompletedEvent(WorkflowResult result) {
-        WorkflowEvent event = new WorkflowEvent();
-        event.setResult(result);
-        event.setEventType(eventService.findEventType(COMPLETED_EVENT_NAME).orElse(createCompletedEventType()));
-
-        return eventService.createEvent(event);
-    }
-
-    private WorkflowEventType createCompletedEventType() {
-        WorkflowEventType eventType = new WorkflowEventType();
-        eventType.setEventType(COMPLETED_EVENT_NAME);
-        eventType.setEventName("Result Completed");
-
-        return eventService.createEventType(eventType);
     }
 }

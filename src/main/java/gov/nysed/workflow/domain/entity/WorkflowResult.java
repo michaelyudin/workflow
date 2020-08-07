@@ -26,9 +26,9 @@ public class WorkflowResult {
     private UUID id;
 
     @ManyToOne
-    private WorkflowConfig workflowConfig;
+    private WorkflowIdentifier workflowIdentifier;
 
-    @OneToMany(targetEntity = WorkflowEvent.class, mappedBy = "result")
+    @OneToMany(targetEntity = WorkflowEvent.class, mappedBy = "result", fetch = FetchType.EAGER)
     @OrderBy("dateCreated")
     private List<WorkflowEvent> events = new LinkedList<>();
 
@@ -48,12 +48,12 @@ public class WorkflowResult {
         this.id = id;
     }
 
-    public WorkflowConfig getWorkflowConfig() {
-        return workflowConfig;
+    public WorkflowIdentifier getWorkflowConfig() {
+        return workflowIdentifier;
     }
 
-    public void setWorkflowConfig(WorkflowConfig workflowConfig) {
-        this.workflowConfig = workflowConfig;
+    public void setWorkflowConfig(WorkflowIdentifier workflowIdentifier) {
+        this.workflowIdentifier = workflowIdentifier;
     }
 
     public List<WorkflowEvent> getEvents() {

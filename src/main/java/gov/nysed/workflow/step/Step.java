@@ -1,7 +1,7 @@
 package gov.nysed.workflow.step;
 
-import gov.nysed.workflow.util.RequestUtil;
 import gov.nysed.workflow.domain.entity.WorkflowResult;
+import gov.nysed.workflow.util.RequestUtil;
 
 public interface Step {
 
@@ -26,19 +26,21 @@ public interface Step {
 
     /**
      * Each step in a flow should have a unique name.
+     *
      * @return
      */
     String getName();
 
     /**
      * The name of the WorkflowEvent that determines whether this step has already processed.
+     *
      * @return
      */
     String getCompletedEventName();
 
     /**
      * Binds the Request data to an object and then runs validators against the object.
-     *
+     * <p>
      * This replaces @ModelAttribute and @Validated annotations.
      *
      * @param object
